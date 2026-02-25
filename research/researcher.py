@@ -177,7 +177,9 @@ class YouTubeResearcher:
             # Search with multiple targeted queries to get diverse results
             queries = [
                 f"{topic} tutorial explained",
-                f"{topic} complete guide course",
+                f"{topic} crash course",
+                f"{topic} full course",
+                f"{topic} project tutorial",
             ]
 
             all_videos = []
@@ -424,7 +426,8 @@ class DocResearcher:
         queries = [
             f'"{topic}" documentation tutorial guide',
             f'{topic} official docs getting started',
-            f'{topic} comprehensive guide explained',
+            f'{topic} cheatsheet best practices',
+            f'{topic} real world examples',
         ]
 
         all_search_results = []

@@ -21,15 +21,36 @@ class CourseGenerator:
         logger.info(f"Generating course structure for: {topic}")
         
         # 1. Research the topic to populate vector store
+        resources = []
         try:
             from research.researcher import ResearchOrchestrator
-            ResearchOrchestrator.research_topic(topic)
+            resources = ResearchOrchestrator.research_topic(topic)
         except Exception as e:
             logger.error(f"Research failed for {topic}: {e}")
             
         # 2. Get Structure from LLM
         structure = LLMService.generate_course_structure(topic, level, goal)
         
+        # Prepare description with resources
+        description = structure.get('description', '')
+        
+        # Filter and format resources
+        yt_resources = [r for r in resources if r.get('type') == 'youtube'][:3]
+        doc_resources = [r for r in resources if r.get('type') == 'documentation'][:3]
+        
+        if yt_resources or doc_resources:
+            description += "\n\n## Recommended Resources\n"
+            
+            if yt_resources:
+                description += "\n### YouTube Tutorials\n"
+                for res in yt_resources:
+                    description += f"- [{res.get('title')}]({res.get('url')})\n"
+            
+            if doc_resources:
+                description += "\n### Documentation & Articles\n"
+                for res in doc_resources:
+                    description += f"- [{res.get('title')}]({res.get('url')})\n"
+
         # 3. Save to DB transactionally
         with transaction.atomic():
             course = Course.objects.create(
@@ -37,7 +58,7 @@ class CourseGenerator:
                 topic=topic,
                 level=level,
                 goal=goal,
-                description=structure.get('description', ''),
+                description=description,
                 status='draft'
             )
             

@@ -73,23 +73,26 @@ class CourseGeneratorTest(TestCase):
         
     @patch('ai_engine.services.requests.post')
     @patch('research.services.VectorStoreService.search')
-    @patch('research.models.ResourceChunk.objects.filter')
-    def test_lesson_generation_with_rag(self, mock_filter, mock_search, mock_post):
+    def test_lesson_generation_with_rag(self, mock_search, mock_post):
         """Test lesson content generation with RAG context and citations"""
         # Setup Course and Lesson
         course = Course.objects.create(user=self.user, topic="Python")
         module = Module.objects.create(course=course, title="Basics", order=0)
         lesson = Lesson.objects.create(module=module, title="Variables", order=0, content="Old content")
         
-        # Mock Vector Search
-        mock_search.return_value = [1] # IDs
+        from research.models import Resource, ResourceChunk
         
-        # Mock ResourceChunk retrieval
-        mock_chunk = MagicMock()
-        mock_chunk.chunk_text = "Variables store data."
-        mock_chunk.resource.title = "Python Docs"
-        mock_chunk.resource.url = "http://python.org"
-        mock_filter.return_value.select_related.return_value = [mock_chunk]
+        # Create real Resource and Chunk
+        resource = Resource.objects.create(title="Python Docs", url="http://python.org", resource_type="documentation")
+        chunk = ResourceChunk.objects.create(resource=resource, chunk_text="Variables store data.", chunk_index=0)
+        
+        # Mock Vector Search to return the ID of the real chunk
+        mock_search.return_value = [chunk.id]
+        
+        # We don't need to mock Chunk filter if we use real ones, but the service uses it.
+        # Actually, let's NOT mock ResourceChunk.objects.filter, let it run against DB.
+        # So we remove that patch.
+
         
         # Mock LLM response
         # generate_stream_sync yields lines.
