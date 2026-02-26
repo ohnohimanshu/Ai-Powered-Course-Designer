@@ -193,7 +193,7 @@ AI_ENGINE = {
     'VECTOR_STORE_PATH': BASE_DIR / 'research' / 'vector_store',
 
     # YouTube Research
-    'YOUTUBE_API_KEY': 'AIzaSyDRAWwRUVD4v_8a2jBo7rAZicNptVZC_xY',  # Google API key with YouTube Data API v3 enabled
+    'YOUTUBE_API_KEY': '',  # Google API key with YouTube Data API v3 enabled
     'YOUTUBE_MAX_RESULTS': 3,
 
     # Documentation Research
